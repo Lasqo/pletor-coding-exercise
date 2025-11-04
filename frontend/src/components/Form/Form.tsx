@@ -1,13 +1,14 @@
 import { useCallback, useState } from "react";
 import { FormInputs } from "./Form.types";
-import { Button, Box, } from "@mui/material";
+import { Button, Box, Typography, } from "@mui/material";
 import { API_URL } from "../../constants/app";
 import { useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
 import { FormInputText } from "./components/FormInputText";
 import { DropDownZone } from "../DropDownZone/DropDownZone";
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 
-export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
+export const Form = ({ onUpload, remainingUploads }: { onUpload: () => void, remainingUploads?: number }) => {
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -54,7 +55,11 @@ export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
         }),
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok){
+        const errorData = await response.json();
+        if (errorData.detail) throw new Error(errorData.detail)
+        else throw new Error("Upload failed");
+      } 
 
       enqueueSnackbar("Image uploaded successfully!", { variant: "success",anchorOrigin: {
          vertical: 'bottom',
@@ -63,7 +68,7 @@ export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
       reset();
       setSelectedFile(null);
       setPreview(null);
-      fetchImages();
+      onUpload();
     } catch (err: any) {
       enqueueSnackbar(err.message, { variant: "error",anchorOrigin: {
          vertical: 'bottom',
@@ -72,7 +77,7 @@ export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
     } finally {
       setSubmitting(false);
     }
-  }, [selectedFile, enqueueSnackbar, reset, fetchImages]);
+  }, [selectedFile, enqueueSnackbar, reset, onUpload]);
 
 
 
@@ -139,7 +144,7 @@ export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
       </Box>
 
       <Button
-        disabled={submitting}
+        disabled={submitting || remainingUploads === 0}
         fullWidth
         loading={submitting}
         sx={{ mt: 2, width: "300px", alignSelf: "center" }}
@@ -148,6 +153,15 @@ export const Form = ({ fetchImages }: { fetchImages: () => void }) => {
       >
         Upload Image
       </Button>
+      {remainingUploads && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1}}>
+        <InfoOutlineIcon style={{ fontSize: 16, color: 'gray' }}/>
+        <Typography sx={{  color: remainingUploads === 0 ? 'red' : 'gray', textAlign: 'center' }}>
+        Remaining uploads for today: {remainingUploads}
+      </Typography>
+      </Box>
+      )
+      }
     </Box>
   );
 };

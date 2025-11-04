@@ -1,14 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
-import { API_URL } from "./constants/app";
+import { API_BASE, API_URL } from "./constants/app";
 import { Form } from "./components/Form/Form";
 import { Image } from "./components/GalleryCards/GalleryCards.types";
 import { GalleryCards } from "./components/GalleryCards/GalleryCards";
 import { useSnackbar } from "notistack";
+import { Box } from "@mui/material";
+type QuotaInfo = {
+    quota_limit: number
+    remaining: number
+    reset_time: Date
+    uploads_today: number  
+    user: string
+}
+type GlobalQuotaInfo = {
+    global_limit: number
+    remaining: number
+    total_uploads_today: number 
+}
 
 function App() {
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userQuota, setUserQuota] = useState<QuotaInfo | null>(null);
+  const [globalQuota, setGlobalQuota] = useState<GlobalQuotaInfo | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
   const fetchImages = useCallback(() => {
@@ -30,11 +45,41 @@ function App() {
           },
         });
       })
-      .finally(() => setLoading(false));
   }, [enqueueSnackbar]);
+  
+  const fetchUserQuota = async (username:string) => {
+    if (!username) {
+      setUserQuota(null);
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE}/quota/${username}`);
+      if (!response.ok) throw new Error('Failed to fetch user quota');
+      const data = await response.json();
+      setUserQuota(data);
+    } catch (err) {
+      console.error('Error fetching user quota:', err);
+    }
+  };
+
+  const fetchGlobalQuota = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/quota/global/info`);
+      if (!response.ok) throw new Error('Failed to fetch global quota');
+      const data = await response.json();
+      setGlobalQuota(data);
+    } catch (err) {
+      console.error('Error fetching global quota:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     fetchImages();
+    fetchUserQuota("josh");
+    fetchGlobalQuota();
   }, [fetchImages]);
 
   const handleDelete = async (id: string) => {
@@ -51,6 +96,8 @@ function App() {
       });
 
       fetchImages();
+      fetchUserQuota("josh");
+      fetchGlobalQuota();
     } catch (error) {
       enqueueSnackbar(
         error instanceof Error ? error.message : "Failed to delete image",
@@ -67,6 +114,7 @@ function App() {
 
   return (
     <>
+    <Box>
       <h1
         style={{
           alignSelf: "center",
@@ -79,7 +127,13 @@ function App() {
       >
         Image Gallery
       </h1>
-      <Form fetchImages={fetchImages} />
+      </Box>
+      <Form onUpload={()=>{
+        fetchImages();
+        fetchUserQuota("josh");
+        fetchGlobalQuota();
+      }} 
+      remainingUploads={userQuota?.remaining} />
       <GalleryCards
         handleDelete={handleDelete}
         images={images}
