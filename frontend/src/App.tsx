@@ -1,144 +1,61 @@
-import { useCallback, useEffect, useState } from "react";
-import "./App.css";
-import { API_BASE, API_URL } from "./constants/app";
-import { Form } from "./components/Form/Form";
-import { Image } from "./components/GalleryCards/GalleryCards.types";
-import { GalleryCards } from "./components/GalleryCards/GalleryCards";
-import { useSnackbar } from "notistack";
-import { Box } from "@mui/material";
-type QuotaInfo = {
-    quota_limit: number
-    remaining: number
-    reset_time: Date
-    uploads_today: number  
-    user: string
-}
-type GlobalQuotaInfo = {
-    global_limit: number
-    remaining: number
-    total_uploads_today: number 
-}
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { Box, Button, Typography } from "@mui/material";
+import { GalleryView } from "./pages/GalleryView";
+import { LoginPage } from "./pages/LoginPage";
+import { AuthProvider, useAuth } from "./providers/AuthProvider";
 
 function App() {
-  const [images, setImages] = useState<Image[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userQuota, setUserQuota] = useState<QuotaInfo | null>(null);
-  const [globalQuota, setGlobalQuota] = useState<GlobalQuotaInfo | null>(null);
-  const { enqueueSnackbar } = useSnackbar();
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
 
-  const fetchImages = useCallback(() => {
-    setLoading(true);
-    fetch(API_URL)
-      .then((result): Promise<Image[]> => {
-        if (!result.ok) {
-          throw new Error("Failed to fetch images");
-        }
-        return result.json();
-      })
-      .then(setImages)
-      .catch((error: Error) => {
-        enqueueSnackbar(error.message, {
-          variant: "error",
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "right",
-          },
-        });
-      })
-  }, [enqueueSnackbar]);
-  
-  const fetchUserQuota = async (username:string) => {
-    if (!username) {
-      setUserQuota(null);
-      return;
-    }
-    try {
-      const response = await fetch(`${API_BASE}/quota/${username}`);
-      if (!response.ok) throw new Error('Failed to fetch user quota');
-      const data = await response.json();
-      setUserQuota(data);
-    } catch (err) {
-      console.error('Error fetching user quota:', err);
-    }
-  };
-
-  const fetchGlobalQuota = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/quota/global/info`);
-      if (!response.ok) throw new Error('Failed to fetch global quota');
-      const data = await response.json();
-      setGlobalQuota(data);
-    } catch (err) {
-      console.error('Error fetching global quota:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  useEffect(() => {
-    fetchImages();
-    fetchUserQuota("josh");
-    fetchGlobalQuota();
-  }, [fetchImages]);
-
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(API_URL + id, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete image");
-
-      enqueueSnackbar("Image deleted successfully", {
-        variant: "success",
-        anchorOrigin: {
-          vertical: "bottom",
-          horizontal: "right",
-        },
-      });
-
-      fetchImages();
-      fetchUserQuota("josh");
-      fetchGlobalQuota();
-    } catch (error) {
-      enqueueSnackbar(
-        error instanceof Error ? error.message : "Failed to delete image",
-        {
-          variant: "error",
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "right",
-          },
-        }
-      );
-    }
-  };
+function AppContent() {
+  const { auth, handleLogout } = useAuth();
 
   return (
     <>
-    <Box>
-      <h1
-        style={{
-          alignSelf: "center",
-          color: "#222",
-          fontSize: "3rem",
-          fontWeight: 700,
-          letterSpacing: "-2px",
-          textAlign: "center",
-        }}
-      >
-        Image Gallery
-      </h1>
+      <Box sx={{ 
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #eee',
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        p: 2,
+      }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            Image Gallery
+          </Link>
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {auth ? (
+            <>
+              <Typography>Welcome, {auth.user.username}</Typography>
+              <Button variant="outlined" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button 
+              variant="contained" 
+              component={Link} 
+              to="/login"
+            >
+              Login
+            </Button>
+          )}
+        </Box>
       </Box>
-      <Form onUpload={()=>{
-        fetchImages();
-        fetchUserQuota("josh");
-        fetchGlobalQuota();
-      }} 
-      remainingUploads={userQuota?.remaining} />
-      <GalleryCards
-        handleDelete={handleDelete}
-        images={images}
-        loading={loading}
-      />
+
+      <Routes>
+        <Route path="/" element={<GalleryView />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
     </>
   );
 }

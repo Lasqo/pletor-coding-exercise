@@ -1,85 +1,103 @@
 import { useCallback, useState } from "react";
 import { FormInputs } from "./Form.types";
-import { Button, Box, Typography, } from "@mui/material";
-import { API_URL } from "../../constants/app";
+import { Button, Box, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
 import { FormInputText } from "./components/FormInputText";
 import { DropDownZone } from "../DropDownZone/DropDownZone";
-import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import { Link } from "react-router-dom";
+import { API_BASE } from "../../constants/app";
+import { useAuth } from "../../providers/AuthProvider";
 
-export const Form = ({ onUpload, remainingUploads }: { onUpload: () => void, remainingUploads?: number }) => {
-  
+type FormProps = {
+  onUpload: () => void;
+  remainingUploads?: {
+    remainingUserUploadQuota: number | undefined;
+    remainingGlobalUploadQuota: number | undefined;
+  };
+};
+
+export const Form = ({ onUpload, remainingUploads }: FormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const { auth } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
   const { control, handleSubmit, reset } = useForm<FormInputs>({
     defaultValues: {
       title: "",
-      user: "",
       url: "",
     },
   });
 
-  const onSubmit = useCallback(async (data: FormInputs) => {
-    setSubmitting(true);
+  const onSubmit = useCallback(
+    async (data: FormInputs) => {
+      setSubmitting(true);
 
-    try {
-      let imageUrl = data.url;
+      try {
+        let imageUrl = data.url;
 
-      if (selectedFile) {
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(selectedFile);
+        if (selectedFile) {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+          });
+
+          imageUrl = await base64Promise;
+        }
+
+        if (!imageUrl && !selectedFile) {
+          throw new Error("Please provide either a file or URL");
+        }
+
+        const response = await fetch(`${API_BASE}/images`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth?.token}`,
+          },
+          body: JSON.stringify({
+            title: data.title,
+            url: imageUrl,
+          }),
         });
 
-        imageUrl = await base64Promise;
+        if (!response.ok) {
+          const errorData = await response.json();
+          if (errorData.detail) throw new Error(errorData.detail);
+          else throw new Error("Upload failed");
+        }
+
+        enqueueSnackbar("Image uploaded successfully!", {
+          variant: "success",
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "right",
+          },
+        });
+        reset();
+        setSelectedFile(null);
+        setPreview(null);
+        onUpload();
+      } catch (err: any) {
+        enqueueSnackbar(err.message, {
+          variant: "error",
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "right",
+          },
+        });
+      } finally {
+        setSubmitting(false);
       }
-
-      if (!imageUrl && !selectedFile) {
-        throw new Error("Please provide either a file or URL");
-      }
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.title,
-          user: data.user,
-          url: imageUrl,
-        }),
-      });
-
-      if (!response.ok){
-        const errorData = await response.json();
-        if (errorData.detail) throw new Error(errorData.detail)
-        else throw new Error("Upload failed");
-      } 
-
-      enqueueSnackbar("Image uploaded successfully!", { variant: "success",anchorOrigin: {
-         vertical: 'bottom',
-          horizontal: 'right'
-          } });
-      reset();
-      setSelectedFile(null);
-      setPreview(null);
-      onUpload();
-    } catch (err: any) {
-      enqueueSnackbar(err.message, { variant: "error",anchorOrigin: {
-         vertical: 'bottom',
-          horizontal: 'right'
-          }});
-    } finally {
-      setSubmitting(false);
-    }
-  }, [selectedFile, enqueueSnackbar, reset, onUpload]);
-
-
+    },
+    [selectedFile, enqueueSnackbar, reset, onUpload]
+  );
 
   return (
     <Box
@@ -97,19 +115,19 @@ export const Form = ({ onUpload, remainingUploads }: { onUpload: () => void, rem
         p: 3,
       }}
     >
-    <DropDownZone
-      preview={preview}
-      onError={()=>{
-         setPreview(null);
-      }}
-      onFinishImageLoad={({file, previewUrl}) => {
-        setSelectedFile(file) 
-         setPreview(previewUrl);
-      }}
-    />
+      <DropDownZone
+        preview={preview}
+        onError={() => {
+          setPreview(null);
+        }}
+        onFinishImageLoad={({ file, previewUrl }) => {
+          setSelectedFile(file);
+          setPreview(previewUrl);
+        }}
+      />
       <FormInputText
         control={control}
-        disabled={submitting }
+        disabled={submitting}
         label="Image URL (optional)"
         name="url"
         rules={{
@@ -134,17 +152,15 @@ export const Form = ({ onUpload, remainingUploads }: { onUpload: () => void, rem
           required
           rules={{ required: "Title is required" }}
         />
-        <FormInputText
-          control={control}
-          label="Username"
-          name="user"
-          required
-          rules={{ required: "Username is required" }}
-        />
       </Box>
 
       <Button
-        disabled={submitting || remainingUploads === 0}
+        disabled={
+          submitting ||
+          remainingUploads?.remainingUserUploadQuota === 0 ||
+          remainingUploads?.remainingGlobalUploadQuota === 0 ||
+          !auth
+        }
         fullWidth
         loading={submitting}
         sx={{ mt: 2, width: "300px", alignSelf: "center" }}
@@ -153,15 +169,61 @@ export const Form = ({ onUpload, remainingUploads }: { onUpload: () => void, rem
       >
         Upload Image
       </Button>
-      {remainingUploads && (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1}}>
-        <InfoOutlineIcon style={{ fontSize: 16, color: 'gray' }}/>
-        <Typography sx={{  color: remainingUploads === 0 ? 'red' : 'gray', textAlign: 'center' }}>
-        Remaining uploads for today: {remainingUploads}
-      </Typography>
-      </Box>
-      )
-      }
+      {!auth && (
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="body1" color="textSecondary">
+            Please <Link to="/login">login</Link> to upload and manage images
+          </Typography>
+        </Box>
+      )}
+      {auth && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
+            <InfoOutlineIcon style={{ fontSize: 16, color: "gray" }} />
+            <Typography
+              sx={{
+                color:
+                  remainingUploads?.remainingUserUploadQuota === 0
+                    ? "red"
+                    : "gray",
+                textAlign: "center",
+              }}
+            >
+              {`Remaining uploads you may do today: ${
+                remainingUploads?.remainingUserUploadQuota ?? "N/A"
+              }`}
+            </Typography>
+          </Box>
+          <Typography
+            sx={{
+              color:
+                remainingUploads?.remainingGlobalUploadQuota === 0
+                  ? "red"
+                  : "gray",
+              textAlign: "center",
+            }}
+          >
+            {`Total remaining uploads for the day: ${
+              remainingUploads?.remainingGlobalUploadQuota ?? "N/A"
+            }`}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

@@ -2,3 +2,9 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 aiosqlite
+passlib
+python-jose[cryptography]
+python-multipart
+email-validator
+pydantic[email]
+python-jose[cryptography]

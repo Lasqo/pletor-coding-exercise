@@ -40,7 +40,7 @@ export const GalleryCards = ({ images, loading, handleDelete }: GalleryCardsProp
   return (
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax( 1fr,340px))',
         gap: 16,
         alignItems: 'stretch',
         padding: 24

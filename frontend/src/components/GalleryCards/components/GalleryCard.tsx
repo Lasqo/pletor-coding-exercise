@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Box, Typography, Button, Fade, Zoom, IconButton } from "@mui/material";
+import { useMemo, useState } from "react";
+import { Box, Typography, Fade, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Image } from "../GalleryCards.types";
+import { useAuth } from "../../../providers/AuthProvider";
 
 type GalleryCardProps = {
   image: Image;
@@ -12,6 +13,7 @@ type GalleryCardProps = {
 export const GalleryCard = ({ image, handleDelete }: GalleryCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const { auth } = useAuth();
 
   const handleClosePreview = (e: React.MouseEvent) => {
     // Only close if clicking the backdrop, not the image
@@ -20,6 +22,7 @@ export const GalleryCard = ({ image, handleDelete }: GalleryCardProps) => {
     }
   };
 
+  const canDeleteImage = useMemo(() => auth?.user && auth.user.id === image.user_id, [auth, image.user_id]);
   return (
     <>
       <Box
@@ -65,7 +68,7 @@ export const GalleryCard = ({ image, handleDelete }: GalleryCardProps) => {
             }}
           />
 
-          {isHovering && (
+          {isHovering &&canDeleteImage && (
             <IconButton
               aria-label={`Delete ${image.title}`}
               onClick={() => handleDelete(image.id)}

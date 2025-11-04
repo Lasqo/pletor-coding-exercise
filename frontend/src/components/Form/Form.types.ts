@@ -5,6 +5,5 @@ export type UploadProgress = {
 }
 export type FormInputs = {
   title: string;
-  user: string;
   url: string;
 }

@@ -1,6 +1,7 @@
-import { Box, Button, debounce, Skeleton, Typography } from "@mui/material";
+import { Box, Button, Skeleton, Typography } from "@mui/material";
 import React, { useCallback, useState } from "react";
 import { InputButton } from "../InputButton";
+import debounce from "lodash/debounce";
 type DropDownZoneProps = {
   onFinishImageLoad: ({
     file,
