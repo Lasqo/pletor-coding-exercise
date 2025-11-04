@@ -23,7 +23,7 @@ export const Form = ({ onUpload, remainingUploads }: FormProps) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { auth } = useAuth();
+  const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
   const { control, handleSubmit, reset } = useForm<FormInputs>({
@@ -57,9 +57,9 @@ export const Form = ({ onUpload, remainingUploads }: FormProps) => {
 
         const response = await fetch(`${API_BASE}/images`, {
           method: "POST",
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${auth?.token}`,
           },
           body: JSON.stringify({
             title: data.title,
@@ -159,7 +159,7 @@ export const Form = ({ onUpload, remainingUploads }: FormProps) => {
           submitting ||
           remainingUploads?.remainingUserUploadQuota === 0 ||
           remainingUploads?.remainingGlobalUploadQuota === 0 ||
-          !auth
+          !user
         }
         fullWidth
         loading={submitting}
@@ -169,14 +169,14 @@ export const Form = ({ onUpload, remainingUploads }: FormProps) => {
       >
         Upload Image
       </Button>
-      {!auth && (
+      {!user && (
         <Box sx={{ textAlign: "center" }}>
           <Typography variant="body1" color="textSecondary">
             Please <Link to="/login">login</Link> to upload and manage images
           </Typography>
         </Box>
       )}
-      {auth && (
+      {user && (
         <Box
           sx={{
             display: "flex",

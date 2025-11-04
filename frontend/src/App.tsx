@@ -15,7 +15,7 @@ function App() {
 }
 
 function AppContent() {
-  const { auth, handleLogout } = useAuth();
+  const { user, handleLogout } = useAuth();
 
   return (
     <>
@@ -33,9 +33,9 @@ function AppContent() {
           </Link>
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          {auth ? (
+          {user ? (
             <>
-              <Typography>Welcome, {auth.user.username}</Typography>
+              <Typography>Welcome, {user.username}</Typography>
               <Button variant="outlined" onClick={handleLogout}>
                 Logout
               </Button>

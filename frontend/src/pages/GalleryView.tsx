@@ -26,18 +26,15 @@ export const GalleryView = () => {
   const [images, setImages] = useState<Image[]>([]);
   const [userQuota, setUserQuota] = useState<QuotaInfo | null>(null);
 
-  const { auth } = useAuth();
+  const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
   const fetchImages = useCallback(() => {
     setLoading(true);
-    const endpoint = auth ? `${API_BASE}/images/me` : `${API_BASE}/images`;
+    const endpoint = user ? `${API_BASE}/images/me` : `${API_BASE}/images`;
     const headers: HeadersInit = {};
-    if (auth) {
-      headers.Authorization = `Bearer ${auth.token}`;
-    }
 
-    fetch(endpoint, { headers })
+    fetch(endpoint, { credentials: 'include'})
       .then((result): Promise<Image[]> => {
         if (!result.ok) {
           throw new Error("Failed to fetch images");
@@ -52,14 +49,14 @@ export const GalleryView = () => {
         });
       })
       .finally(() => setLoading(false));
-  }, [auth, enqueueSnackbar]);
+  }, [user, enqueueSnackbar]);
 
   const fetchUserQuota = useCallback(async () => {
-    if (!auth) return;
-    
+    if (!user) return;
+
     try {
       const response = await fetch(`${API_BASE}/quota/me`, {
-        headers: { Authorization: `Bearer ${auth.token}` }
+        credentials: 'include'
       });
       
       
@@ -69,11 +66,13 @@ export const GalleryView = () => {
     } catch (err) {
       console.error('Error fetching user quota:', err);
     }
-  }, [auth]);
+  }, [user]);
 
   const fetchGlobalQuota = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE}/quota/global`);
+      const response = await fetch(`${API_BASE}/quota/global`,{
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch global quota');
       const data = await response.json();
       setGlobalQuota(data);
@@ -84,19 +83,19 @@ export const GalleryView = () => {
 
   useEffect(() => {
     fetchImages();
-    if (auth) {
+    if (user) {
       fetchUserQuota();
       fetchGlobalQuota();
     }
-  }, [fetchImages, fetchUserQuota,auth]);
+  }, [fetchImages, fetchUserQuota, user]);
 
   const handleDelete = async (id: string) => {
-    if (!auth) return;
+    if (!user) return;
 
     try {
       const response = await fetch(`${API_BASE}/images/${id}`, { 
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.token}` }
+        credentials: 'include'
       });
       
       

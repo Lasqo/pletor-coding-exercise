@@ -13,7 +13,7 @@ type GalleryCardProps = {
 export const GalleryCard = ({ image, handleDelete }: GalleryCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const { auth } = useAuth();
+  const { user } = useAuth();
 
   const handleClosePreview = (e: React.MouseEvent) => {
     // Only close if clicking the backdrop, not the image
@@ -22,7 +22,7 @@ export const GalleryCard = ({ image, handleDelete }: GalleryCardProps) => {
     }
   };
 
-  const canDeleteImage = useMemo(() => auth?.user && auth.user.id === image.user_id, [auth, image.user_id]);
+  const canDeleteImage = useMemo(() => user && user.id === image.user_id, [user, image.user_id]);
   return (
     <>
       <Box

@@ -3,12 +3,12 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { API_BASE } from "../../constants/app";
 import { FormInputText } from "../Form/components/FormInputText";
-import { LoginFormInputs, RegisterFormInputs } from "./Auth.types";
+import { LoginFormInputs, RegisterFormInputs, User } from "./Auth.types";
 
 
 
 type AuthProps = {
-  onLogin: (token: string, user: any) => void;
+  onLogin: ( user: User) => void;
   onError: (message: string) => void;
 };
 
@@ -31,6 +31,7 @@ export const Auth = ({ onLogin, onError }: AuthProps) => {
     try {
       const response = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
@@ -41,7 +42,7 @@ export const Auth = ({ onLogin, onError }: AuthProps) => {
       }
 
       const responseData = await response.json();
-      onLogin(responseData.access_token, responseData.user);
+      onLogin(responseData.user);
     } catch (error) {
       onError(error instanceof Error ? error.message : "Login failed");
     }
@@ -51,6 +52,7 @@ export const Auth = ({ onLogin, onError }: AuthProps) => {
     try {
       const response = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: data.registerEmail,
@@ -66,6 +68,7 @@ export const Auth = ({ onLogin, onError }: AuthProps) => {
 
       const loginResponse = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: data.registerEmail,
@@ -77,7 +80,7 @@ export const Auth = ({ onLogin, onError }: AuthProps) => {
         throw new Error("Registration successful but login failed");
       }
       const responseData = await loginResponse.json();
-      onLogin(responseData.access_token, responseData.user);
+      onLogin(responseData.user);
     } catch (error) {
       onError(error instanceof Error ? error.message : "Registration failed");
     }

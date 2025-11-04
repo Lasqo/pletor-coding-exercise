@@ -2,6 +2,7 @@ import { Auth } from "../components/Auth/Auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box } from "@mui/material";
 import { useAuth } from "../providers/AuthProvider";
+import { User } from "../components/Auth/Auth.types";
 
 
 export const LoginPage = () => {
@@ -10,8 +11,8 @@ export const LoginPage = () => {
   const { handleAuthSuccess, handleAuthError } = useAuth();
   const from = location.state?.from?.pathname || "/";
 
-  const onLogin = (token: string, user: any) => {
-    handleAuthSuccess(token, user);
+  const onLogin = (user: User) => {
+    handleAuthSuccess(user);
     navigate(from, { replace: true });
   };
 

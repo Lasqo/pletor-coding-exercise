@@ -1,24 +1,17 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
+import { API_BASE } from "../constants/app";
+import { User } from "../components/Auth/Auth.types";
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
 
-type User = {
-  id: number;
-  email: string;
-  username: string;
-  created_at: string;
-};
 
-type AuthState = {
-  token: string;
-  user: User;
-} | null;
+
 
 type AuthContextType = {
-  auth: AuthState;
-  handleAuthSuccess: (token: string, user: User) => void;
+  user: User | null;
+  handleAuthSuccess: (user: User) => void;
   handleAuthError: (message: string) => void;
   handleLogout: () => void;
   isCheckingAuth: boolean;
@@ -27,36 +20,34 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [auth, setAuth] = useState<AuthState>(null);
+    const [user, setUser] = useState<User | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    const loadAuthFromStorage = () => {
+   useEffect(() => {
+    // Check if user is authenticated by calling /auth/me
+    const checkAuth = async () => {
       try {
-        const token = localStorage.getItem(AUTH_TOKEN_KEY);
-        const userStr = localStorage.getItem(AUTH_USER_KEY);
+        const response = await fetch(`${API_BASE}/auth/me`, {
+          credentials: 'include', // Send cookies
+        });
         
-        if (token && userStr) {
-          const user = JSON.parse(userStr);
-          setAuth({ token, user });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
         }
       } catch (error) {
-        console.error('Failed to load auth from localStorage:', error);
-        localStorage.removeItem(AUTH_TOKEN_KEY);
-        localStorage.removeItem(AUTH_USER_KEY);
+        console.error('Auth check failed:', error);
       } finally {
         setIsCheckingAuth(false);
       }
     };
 
-    loadAuthFromStorage();
+    checkAuth();
   }, []);
 
-  const handleAuthSuccess = (token: string, user: User) => {
-    setAuth({ token, user });
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+   const handleAuthSuccess = (user: User) => {
+    setUser(user);
   };
 
   const handleAuthError = (message: string) => {
@@ -66,10 +57,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const handleLogout = () => {
-    setAuth(null);
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(AUTH_USER_KEY);
+ const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+    
+    setUser(null);
     
     enqueueSnackbar('Logged out successfully', {
       variant: 'info',
@@ -79,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      auth, 
+      user, 
       handleAuthSuccess, 
       handleAuthError, 
       handleLogout,

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, Response, HTTPException, status, Cookie
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -22,7 +22,6 @@ SECRET_KEY = "secret_key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-security = HTTPBearer()
 
 class User(Base):
     __tablename__ = "users"
@@ -133,12 +132,20 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    access_token: Optional[str] = Cookie(None, alias="access_token"),
     db: AsyncSession = Depends(get_db)
 ) -> User:
+    """
+    Get current user from HTTP-only cookie instead of Authorization header.
+    """
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
     try:
-        token = credentials.credentials
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -263,8 +270,8 @@ async def on_startup():
             db.add_all(fake_images)
             await db.commit()
 
-@app.post("/auth/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
+@app.post("/auth/register", status_code=status.HTTP_201_CREATED)
+async def register(user_data: UserRegister, response: Response, db: AsyncSession = Depends(get_db)):
     # Check if email already exists
     result = await db.execute(select(User).where(User.email == user_data.email))
     if result.scalar_one_or_none():
@@ -297,19 +304,25 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     
-    return Token(
-        access_token=access_token,
-        token_type="bearer",
-        user=UserResponse.from_orm(new_user)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
-
-@app.post("/auth/login", response_model=Token)
-async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
-    # Find user by email
+    
+    return {"user": UserResponse.from_orm(new_user)}
+@app.post("/auth/login")
+async def login(
+    credentials: UserLogin, 
+    response: Response,
+    db: AsyncSession = Depends(get_db)
+):
+    # Find user
     result = await db.execute(
-        select(User).where(
-            (User.email == credentials.username)
-        )
+        select(User).where(User.email == credentials.username)
     )
     user = result.scalar_one_or_none()
     
@@ -319,16 +332,33 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             detail="Incorrect email or password"
         )
     
+    # Create token
     access_token = create_access_token(
         data={"sub": user.id},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     
-    return Token(
-        access_token=access_token,
-        token_type="bearer",
-        user=UserResponse.from_orm(user)
+    # Set HTTP-only cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,      # Cannot be accessed by JavaScript
+        secure=False,       # Set to True in production with HTTPS
+        samesite="lax",     # CSRF protection
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Cookie expiration in seconds
     )
+    
+    # Return user info (no token in response body)
+    return {"user": UserResponse.from_orm(user)}
+@app.post("/auth/logout")
+async def logout(response: Response):
+    """Clear the authentication cookie"""
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        samesite="lax"
+    )
+    return {"message": "Logged out successfully"}
 
 @app.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
