@@ -61,27 +61,27 @@ export default function SubmissionForm({ onSuccess, onError, error }: Submission
   }
 
   return (
-    <div style={{ width: '320px', padding: '2rem', borderRight: '1px solid #eee', background: '#f9f9f9' }}>
-      <h1 style={{ textAlign: 'left', fontSize: '2rem', fontWeight: 700, marginBottom: 32, letterSpacing: '-1px', color: '#222' }}>Image Gallery</h1>
+    <div style={{ width: '320px', padding: '2rem', borderRight: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
+      <h1 style={{ textAlign: 'left', fontSize: '2rem', fontWeight: 700, marginBottom: 32, letterSpacing: '-1px', color: 'var(--text-primary)' }}>Image Gallery</h1>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div>
-          <label style={{ fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>Title</label>
-          <input name="title" value={form.title} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #ccc' }} />
+          <label style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 6 }}>Title</label>
+          <input name="title" value={form.title} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)' }} />
         </div>
         <div>
-          <label style={{ fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>User</label>
-          <input name="user" value={form.user} onChange={handleChange} onBlur={() => fetchQuota(form.user)} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #ccc' }} />
-          {quota && <p style={{ fontSize: 13, color: '#666', marginTop: 6, fontWeight: 500 }}>Daily Quota: {quota.usage}/{quota.limit}</p>}
+          <label style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 6 }}>User</label>
+          <input name="user" value={form.user} onChange={handleChange} onBlur={() => fetchQuota(form.user)} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)' }} />
+          {quota && <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6, fontWeight: 500 }}>Daily Quota: {quota.usage}/{quota.limit}</p>}
         </div>
         <div>
-          <label style={{ fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>Image URL</label>
-          <input name="url" value={form.url} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #ccc' }} />
+          <label style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 6 }}>Image URL</label>
+          <input name="url" value={form.url} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)' }} />
         </div>
-        <button type="submit" disabled={submitting} style={{ padding: '12px', marginTop: 8, borderRadius: 6, background: '#222', color: 'white', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: 16, transition: 'opacity 0.2s', opacity: submitting ? 0.7 : 1 }}>
+        <button type="submit" disabled={submitting} style={{ padding: '12px', marginTop: 8, borderRadius: 6, background: 'var(--button-bg)', color: 'var(--button-text)', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: 16, transition: 'opacity 0.2s', opacity: submitting ? 0.7 : 1 }}>
           {submitting ? 'Adding...' : 'Add Image'}
         </button>
       </form>
-      {error && <div style={{ marginTop: 20, padding: 12, borderRadius: 6, background: '#fee2e2', color: '#c0392b', fontSize: 14 }}>{error.message}</div>}
+      {error && <div style={{ marginTop: 20, padding: 12, borderRadius: 6, background: 'rgba(231, 76, 60, 0.2)', color: '#e74c3c', fontSize: 14 }}>{error.message}</div>}
     </div>
   )
 }
