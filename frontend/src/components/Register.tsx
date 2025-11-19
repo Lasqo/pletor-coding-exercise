@@ -35,8 +35,8 @@ export default function Register({ setToken, switchToLogin }: RegisterProps) {
   }
 
   return (
-    <div style={{ maxWidth: '320px', margin: '0 auto', padding: '2rem', background: '#f9f9f9', borderRadius: '8px' }}>
-      <h2 style={{ marginBottom: '1rem' }}>Register</h2>
+    <div style={{ maxWidth: '320px', margin: '0 auto', padding: '2rem', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+      <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Register</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <input
           type="text"
@@ -44,7 +44,7 @@ export default function Register({ setToken, switchToLogin }: RegisterProps) {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)' }}
         />
         <input
           type="password"
@@ -52,15 +52,15 @@ export default function Register({ setToken, switchToLogin }: RegisterProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)' }}
         />
-        <button type="submit" style={{ padding: '10px', background: '#222', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+        <button type="submit" style={{ padding: '10px', background: 'var(--button-bg)', color: 'var(--button-text)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
           Register
         </button>
       </form>
-      {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
-      <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
-        Already have an account? <button onClick={switchToLogin} style={{ background: 'none', border: 'none', color: 'blue', cursor: 'pointer', textDecoration: 'underline' }}>Login</button>
+      {error && <p style={{ color: '#e74c3c', marginTop: '1rem' }}>{error}</p>}
+      <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+        Already have an account? <button onClick={switchToLogin} style={{ background: 'none', border: 'none', color: 'var(--accent-color)', cursor: 'pointer', textDecoration: 'underline' }}>Login</button>
       </p>
     </div>
   )
