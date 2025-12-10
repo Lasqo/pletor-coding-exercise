@@ -1,41 +1,27 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Image, ImageFormData } from '../types/image'
+import { Image } from '../types/image'
 import { API_URL } from '../config/api'
 
 interface UseImagesReturn {
   images: Image[]
   loading: boolean
   error: Error | null
-  form: ImageFormData
-  submitting: boolean
   deleting: string | null
-  showSuccess: boolean
-  setForm: React.Dispatch<React.SetStateAction<ImageFormData>>
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>
+  refreshImages: () => void
   handleDelete: (id: string) => Promise<void>
   clearError: () => void
 }
 
-const INITIAL_FORM_STATE: ImageFormData = {
-  title: '',
-  user: '',
-  url: '',
-}
-
 /**
- * Custom hook for managing image CRUD operations
+ * Custom hook for managing image list and delete operations
  */
 export function useImages(): UseImagesReturn {
   const [images, setImages] = useState<Image[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const [form, setForm] = useState<ImageFormData>(INITIAL_FORM_STATE)
-  const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [showSuccess, setShowSuccess] = useState(false)
 
-  const fetchImages = useCallback(() => {
+  const refreshImages = useCallback(() => {
     setLoading(true)
     fetch(API_URL)
       .then((res) => {
@@ -48,43 +34,8 @@ export function useImages(): UseImagesReturn {
   }, [])
 
   useEffect(() => {
-    fetchImages()
-  }, [fetchImages])
-
-  useEffect(() => {
-    if (showSuccess) {
-      const timer = setTimeout(() => {
-        setShowSuccess(false)
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [showSuccess])
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
-  }, [])
-
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setSubmitting(true)
-    setError(null)
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      if (!res.ok) throw new Error('Failed to add image')
-      setForm(INITIAL_FORM_STATE)
-      setShowSuccess(true)
-      fetchImages()
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'))
-    } finally {
-      setSubmitting(false)
-    }
-  }, [form, fetchImages])
+    refreshImages()
+  }, [refreshImages])
 
   const handleDelete = useCallback(async (id: string) => {
     setError(null)
@@ -92,13 +43,13 @@ export function useImages(): UseImagesReturn {
     try {
       const res = await fetch(`${API_URL}${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete image')
-      fetchImages()
+      refreshImages()
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       setDeleting(null)
     }
-  }, [fetchImages])
+  }, [refreshImages])
 
   const clearError = useCallback(() => {
     setError(null)
@@ -108,13 +59,8 @@ export function useImages(): UseImagesReturn {
     images,
     loading,
     error,
-    form,
-    submitting,
     deleting,
-    showSuccess,
-    setForm,
-    handleChange,
-    handleSubmit,
+    refreshImages,
     handleDelete,
     clearError,
   }

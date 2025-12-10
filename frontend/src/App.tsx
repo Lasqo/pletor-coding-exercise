@@ -1,22 +1,21 @@
 import './App.css'
 import { useImages } from './hooks/use-images'
-import { ImageForm } from './components/image-form/image-form'
+import { useStagedImages } from './hooks/use-staged-images'
 import { ImageGrid } from './components/image-grid/image-grid'
-import { StatusMessage } from './components/status-message/status-message'
 
 function App() {
+  const { images, loading, deleting, refreshImages, handleDelete } = useImages()
+
   const {
-    images,
-    loading,
-    error,
-    form,
-    submitting,
-    deleting,
-    showSuccess,
-    handleChange,
-    handleSubmit,
-    handleDelete,
-  } = useImages()
+    stagedImages,
+    addFiles,
+    addUrls,
+    updateStaged,
+    removeStaged,
+    uploadStaged,
+    validationError,
+    clearValidationError,
+  } = useStagedImages(refreshImages)
 
   return (
     <div
@@ -40,26 +39,19 @@ function App() {
         Image Gallery
       </h1>
 
-      <ImageForm
-        form={form}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-        isSubmitting={submitting}
-      />
-
-      <StatusMessage type="success" message="Image added successfully!" visible={showSuccess} />
-
-      <StatusMessage
-        type="error"
-        message={error ? `Error: ${error.message}` : ''}
-        visible={!!error}
-      />
-
       <ImageGrid
         images={images}
         loading={loading}
         onDelete={handleDelete}
         deletingId={deleting}
+        stagedImages={stagedImages}
+        onFilesAdded={addFiles}
+        onUrlsAdded={addUrls}
+        onUpdateStaged={updateStaged}
+        onRemoveStaged={removeStaged}
+        onUploadStaged={uploadStaged}
+        validationError={validationError}
+        onClearValidationError={clearValidationError}
       />
     </div>
   )

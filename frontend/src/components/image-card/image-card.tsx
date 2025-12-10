@@ -76,3 +76,4 @@ export function ImageCard({ image, onDelete, isDeleting }: ImageCardProps) {
     </div>
   )
 }
+
