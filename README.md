@@ -37,3 +37,26 @@ docker compose up --build
 3. API docs: http://localhost:8000/docs
 
 Both services have hot-reload enabled. Feel free to modify anything - frontend, backend, or both.
+
+
+# Post-scriptum
+
+## Questions/remarks:
+
+- I assume this is not a UI design test and will not spend time on UI/styles
+- is a maintainable codebase part of our "production-ready" definition here?
+- I see no typescript config file, that causes some issues with module resolution, was i supposed to add one or just go with vite/esbuild default behavior?
+- There's no PATCH endpoint to update images title or user, was i supposed to add one? is it a part of the exercise?
+
+## Next Steps:
+
+- improve the UI design
+- use a proper object-storage service like s3 for file hosting
+- add pagination with infinite scroll
+- add image item edit "on the fly"
+- allow to set a global `user` value
+- prefill titles with filenames (not the best UX but it'll allow to batch upload images and edit later)
+- use a data fetching library
+- use a form state management library
+- add prettier/biome
+- add search (by title or user)
