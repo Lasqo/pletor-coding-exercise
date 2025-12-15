@@ -69,7 +69,7 @@ function App() {
     try {
       const response = await fetch(API_URL, {
         headers: {
-          "X-User-Email": user?.email || "",
+          "X-User-Email": user?.sub || "",
         },
       });
       if (!response.ok) throw new Error("Failed to fetch images");
@@ -83,9 +83,9 @@ function App() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.email) {
+    if (isAuthenticated && user?.sub) {
       fetchImages();
-      fetchQuota(user.email);
+      fetchQuota(user.sub);
     }
   }, [isAuthenticated, user]);
 
@@ -95,7 +95,7 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user?.email) return;
+    if (!user?.sub) return;
 
     setSubmitting(true);
     setError(null);
@@ -104,9 +104,9 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-User-Email": user.email,
+          "X-User-Email": user.sub,
         },
-        body: JSON.stringify({ ...form, user: user.email }),
+        body: JSON.stringify({ ...form, user: user.sub }),
       });
       if (!res.ok) {
         const errorData = await res
@@ -116,7 +116,7 @@ function App() {
       }
       setForm({ title: "", url: "" });
       fetchImages();
-      fetchQuota(user.email);
+      fetchQuota(user.sub);
     } catch (err: any) {
       setError(err);
     } finally {
@@ -130,7 +130,7 @@ function App() {
       const res = await fetch(API_URL + id, {
         method: "DELETE",
         headers: {
-          "X-User-Email": user?.email || "",
+          "X-User-Email": user?.sub || "",
         },
       });
       if (!res.ok) throw new Error("Failed to delete image");
