@@ -5,9 +5,184 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pletor Coding Exercise</title>
+    <!-- Critical CSS inlined for immediate first paint -->
+    <style>
+      :root {
+        font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        font-weight: 400;
+        color-scheme: light dark;
+        background-color: #f9f9f9;
+        color: #242424;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      /* Initial loading state styles */
+      .initial-loader {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .initial-loader__title {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+        letter-spacing: -2px;
+        color: #222;
+      }
+      .initial-loader__form-skeleton {
+        background: #fff;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px #0002;
+        margin-bottom: 40px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: center;
+        width: 100%;
+        max-width: 700px;
+      }
+      .initial-loader__input-skeleton {
+        background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        height: 32px;
+        min-width: 120px;
+      }
+      .initial-loader__input-skeleton--wide {
+        min-width: 220px;
+      }
+      .initial-loader__btn-skeleton {
+        background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        height: 40px;
+        width: 110px;
+      }
+      .initial-loader__grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        align-items: start;
+        min-height: 400px;
+      }
+      .initial-loader__card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px #0002;
+        overflow: hidden;
+        border: 1px solid #eee;
+      }
+      .initial-loader__card-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      .initial-loader__card-content {
+        padding: 24px;
+      }
+      .initial-loader__text-skeleton {
+        background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 4px;
+        height: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .initial-loader__text-skeleton--title {
+        height: 1.5rem;
+        width: 60%;
+        margin-bottom: 1rem;
+      }
+      .initial-loader__text-skeleton--short {
+        width: 40%;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+      @media (max-width: 900px) {
+        .initial-loader__grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .initial-loader__grid {
+          grid-template-columns: 1fr;
+        }
+        .initial-loader__title {
+          font-size: 2rem;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="root">
+      <!-- Initial loading skeleton shown before React hydrates (improves FCP) -->
+      <div class="initial-loader" aria-label="Loading application">
+        <h1 class="initial-loader__title">Image Gallery</h1>
+        <div class="initial-loader__form-skeleton" aria-hidden="true">
+          <div class="initial-loader__input-skeleton"></div>
+          <div class="initial-loader__input-skeleton"></div>
+          <div class="initial-loader__input-skeleton initial-loader__input-skeleton--wide"></div>
+          <div class="initial-loader__btn-skeleton"></div>
+        </div>
+        <div class="initial-loader__grid" aria-hidden="true">
+          <div class="initial-loader__card">
+            <div class="initial-loader__card-image"></div>
+            <div class="initial-loader__card-content">
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--title"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+            </div>
+          </div>
+          <div class="initial-loader__card">
+            <div class="initial-loader__card-image"></div>
+            <div class="initial-loader__card-content">
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--title"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+            </div>
+          </div>
+          <div class="initial-loader__card">
+            <div class="initial-loader__card-image"></div>
+            <div class="initial-loader__card-content">
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--title"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+              <div class="initial-loader__text-skeleton initial-loader__text-skeleton--short"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
