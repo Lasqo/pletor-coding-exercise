@@ -1,0 +1,21 @@
+.images-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+/* 2 columns for screens 640px and above */
+@media (min-width: 640px) {
+  .images-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 3 columns for screens 1000px and above */
+@media (min-width: 1000px) {
+  .images-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

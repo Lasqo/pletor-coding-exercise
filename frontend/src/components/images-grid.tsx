@@ -1,5 +1,6 @@
 import { Image, ImageCard } from './image-card';
 import { ImageCardSkeleton } from './image-card-skeleton';
+import './images-grid.css';
 
 type ImagesGridProps = {
   images: Image[];
@@ -10,15 +11,7 @@ type ImagesGridProps = {
 export function ImagesGrid({ images, loading, onDelete }: ImagesGridProps) {
   if (loading) {
     return (
-      <div
-        style={{
-          width: '100%',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '2rem',
-          alignItems: 'stretch',
-        }}
-      >
+      <div className="images-grid">
         {[...Array(3)].map((_, i) => (
           <ImageCardSkeleton key={i} />
         ))}
@@ -28,30 +21,14 @@ export function ImagesGrid({ images, loading, onDelete }: ImagesGridProps) {
 
   if (images.length === 0) {
     return (
-      <div
-        style={{
-          width: '100%',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '2rem',
-          alignItems: 'stretch',
-        }}
-      >
+      <div className="images-grid">
         <p style={{ textAlign: 'center', gridColumn: '1/-1' }}>No images found.</p>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '2rem',
-        alignItems: 'stretch',
-      }}
-    >
+    <div className="images-grid">
       {images.map((img) => (
         <ImageCard key={img.id} data={img} onDelete={onDelete} />
       ))}
