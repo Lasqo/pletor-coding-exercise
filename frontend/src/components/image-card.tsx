@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { ConfirmModal } from './confirm-modal';
+import { ImageCardPreview } from './image-card-preview';
 
 export type Image = {
   id: string;
@@ -19,6 +20,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
   const { id, title, created_by, users_access, url, created_at } = data;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -33,6 +35,16 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
 
   const handleCancelDelete = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleImageClick = () => {
+    if (!hasImageError && isImageLoaded) {
+      setIsFullscreenOpen(true);
+    }
+  };
+
+  const handleCloseFullscreen = () => {
+    setIsFullscreenOpen(false);
   };
 
   const onLoadHandler = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -81,12 +93,14 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
               color: '#666',
               textAlign: 'center',
               padding: 24,
+              whiteSpace: 'break-spaces',
             }}
           >
             Unable to find the image, please check the link
           </div>
         ) : (
           <div
+            onClick={handleImageClick}
             style={{
               position: 'relative',
               width: '100%',
@@ -94,6 +108,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               overflow: 'hidden',
+              cursor: isImageLoaded ? 'pointer' : 'default',
             }}
           >
             {/* Shimmer loading skeleton */}
@@ -212,6 +227,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      <ImageCardPreview isOpen={isFullscreenOpen} url={url} title={title} onClose={handleCloseFullscreen} />
     </Fragment>
   );
 }
