@@ -10,7 +10,7 @@ export function Header() {
         color: '#222',
       }}
     >
-      Image Gallery
+      Assets manager
     </h1>
   );
 }
