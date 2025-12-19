@@ -193,12 +193,30 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
             style={{
               display: 'flex',
               flex: 1,
-              justifyContent: 'flex-end',
+              justifyContent: 'space-between',
               alignItems: 'flex-end',
               marginTop: 18,
               width: '100%',
             }}
           >
+            <button
+              onClick={handleDeleteClick}
+              style={{
+                background: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: 6,
+                padding: '8px 24px',
+                cursor: 'pointer',
+                height: 40,
+                fontWeight: 600,
+                fontSize: 16,
+                boxShadow: '0 2px 8px #e74c3c22',
+                transition: 'background 0.2s',
+              }}
+            >
+              Share
+            </button>
             <button
               onClick={handleDeleteClick}
               style={{
