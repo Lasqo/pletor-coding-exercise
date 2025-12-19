@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import { ConfirmModal } from './confirm-modal';
 import { ImageCardPreview } from './image-card-preview';
+import { SharePanel } from './share-panel';
 
 export type Image = {
   id: string;
@@ -21,6 +22,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+  const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -45,6 +47,14 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
 
   const handleCloseFullscreen = () => {
     setIsFullscreenOpen(false);
+  };
+
+  const handleShareClick = () => {
+    setIsSharePanelOpen(true);
+  };
+
+  const handleCloseSharePanel = () => {
+    setIsSharePanelOpen(false);
   };
 
   const onLoadHandler = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -165,30 +175,6 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
             <span style={{ color: '#888', fontWeight: 400 }}>Created: </span>
             <span style={{ color: '#222', fontWeight: 500 }}>{new Date(created_at).toLocaleDateString()}</span>
           </p>
-          <p
-            style={{
-              margin: '0.5rem 0 0 0',
-              display: 'flex',
-              alignItems: 'center',
-              width: '100%',
-              minWidth: 0,
-              overflow: 'hidden',
-            }}
-          >
-            <span style={{ color: '#888', fontWeight: 400, flexShrink: 0 }}>URL: </span>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="fade-text"
-              style={{
-                color: '#222',
-                fontWeight: 500,
-              }}
-            >
-              {url}
-            </a>
-          </p>
           <div
             style={{
               display: 'flex',
@@ -200,7 +186,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
             }}
           >
             <button
-              onClick={handleDeleteClick}
+              onClick={handleShareClick}
               style={{
                 background: '#007bff',
                 color: 'white',
@@ -216,6 +202,24 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
               }}
             >
               Share
+            </button>
+            <button
+              onClick={handleShareClick}
+              style={{
+                background: '#999',
+                color: 'white',
+                border: 'none',
+                borderRadius: 6,
+                padding: '8px 24px',
+                cursor: 'pointer',
+                height: 40,
+                fontWeight: 600,
+                fontSize: 16,
+                boxShadow: '0 2px 8px #e74c3c22',
+                transition: 'background 0.2s',
+              }}
+            >
+              Edit
             </button>
             <button
               onClick={handleDeleteClick}
@@ -246,6 +250,7 @@ export function ImageCard({ data, onDelete }: ImageCardProps) {
         onCancel={handleCancelDelete}
       />
       <ImageCardPreview isOpen={isFullscreenOpen} url={url} title={title} onClose={handleCloseFullscreen} />
+      <SharePanel isOpen={isSharePanelOpen} title={title} url={url} onClose={handleCloseSharePanel} />
     </Fragment>
   );
 }
