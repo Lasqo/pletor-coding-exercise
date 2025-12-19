@@ -25,8 +25,9 @@ function App() {
   }, []);
 
   useEffect(() => {
+    console.log('fetching images');
     fetchImages();
-  }, [fetchImages]);
+  }, []);
 
   const handleAddImage = useCallback(
     async (data: { title: string; user: string; url: string }) => {
@@ -45,15 +46,18 @@ function App() {
     [fetchImages]
   );
 
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(API_URL + id, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete image');
-      fetchImages();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete image');
-    }
-  };
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        const res = await fetch(API_URL + id, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete image');
+        fetchImages();
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Failed to delete image');
+      }
+    },
+    [fetchImages]
+  );
 
   return (
     <div
