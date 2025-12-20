@@ -25,12 +25,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log('fetching images');
     fetchImages();
   }, []);
 
   const handleAddImage = useCallback(
-    async (data: { title: string; user: string; url: string }) => {
+    async (data: { title: string; created_by: string; users_access: string; url: string }) => {
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -39,6 +38,7 @@ function App() {
         });
         if (!res.ok) throw new Error('Failed to add image');
         fetchImages();
+        toast.success('Image added successfully');
       } catch (err: unknown) {
         toast.error(err instanceof Error ? err.message : 'Failed to add image');
       }

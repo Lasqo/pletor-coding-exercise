@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 type ImageFormData = {
   title: string;
-  user: string;
+  created_by: string;
   users_access: string;
   url: string;
 };
@@ -32,7 +32,7 @@ export const ImageForm = ({ onSubmit }: ImageFormProps) => {
       try {
         await onSubmit({
           title: form.title,
-          user: USER_NAME,
+          created_by: USER_NAME,
           users_access: form.users_access,
           url: form.url,
         });
