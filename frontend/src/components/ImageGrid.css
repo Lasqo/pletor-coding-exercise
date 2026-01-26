@@ -1,0 +1,47 @@
+.masonry-grid {
+  display: flex;
+  width: 100%;
+  gap: 16px;
+}
+
+.masonry-grid-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.image-grid-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.image-grid-error {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+}
+
+.image-grid-empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.image-grid-observer-target {
+  height: 20px;
+}
+
+.image-grid-loading-more {
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  .masonry-grid {
+    gap: 12px;
+  }
+
+  .masonry-grid-column {
+    gap: 12px;
+  }
+}
