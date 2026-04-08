@@ -5,6 +5,7 @@ aiosqlite
 python-multipart
 python-jose[cryptography]
 passlib[bcrypt]
+bcrypt>=3.2,<4
 pytest
 pytest-asyncio
 httpx
